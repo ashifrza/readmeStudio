@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Turn your project description into a clear, downloadable README with local AI.">
+  <title>README Studio | Give your project a proper introduction</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#project-form">Skip to project details</a>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="README Studio home">
+      <span class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 4h10l4 4v12H5V4Z"/><path d="M14 4v5h5M8 13h8M8 16h5"/></svg>
+      </span>
+      <span>readme<span class="brand-light">studio</span><span class="brand-period">.</span></span>
+    </a>
+    <span class="local-badge"><span aria-hidden="true"></span> Powered by local AI</span>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow"><span aria-hidden="true">✳</span> SMALL PROJECTS. CLEAR DOCUMENTATION.</div>
+      <h1 id="page-title">You build it.<br>We help <span>explain it.</span></h1>
+      <p>Give your project a proper introduction. Describe what you’re building<br class="desktop-break"> and turn it into a README people can actually use.</p>
+      <div class="workflow" aria-label="How it works">
+        <span><b>01</b> Describe your project</span>
+        <span class="workflow-arrow" aria-hidden="true">→</span>
+        <span><b>02</b> Generate your README</span>
+        <span class="workflow-arrow" aria-hidden="true">→</span>
+        <span><b>03</b> Make it yours</span>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <section class="form-panel" aria-labelledby="form-title">
+        <div class="panel-heading">
+          <span class="section-number" aria-hidden="true">01 / INPUT</span>
+          <h2 id="form-title">Tell us about your project</h2>
+          <p>A little context goes a long way.</p>
+        </div>
+        <form id="project-form">
+          <div class="field">
+            <label for="projectName">Project name <span class="required" aria-hidden="true">*</span></label>
+            <input id="projectName" name="projectName" maxlength="80" required autocomplete="off" placeholder="e.g. TaskNest">
+          </div>
+          <div class="field">
+            <div class="label-row">
+              <label for="description">What does it do? <span class="required" aria-hidden="true">*</span></label>
+              <span class="char-count" id="description-count">0 / 3000</span>
+            </div>
+            <textarea id="description" name="description" rows="6" minlength="40" maxlength="3000" required aria-describedby="description-hint" placeholder="A task manager for students to organize assignments, set due dates, and keep track of their progress. Users can create projects and mark tasks as complete…"></textarea>
+            <p class="field-hint" id="description-hint">Explain who it’s for, what it solves, and its main features. At least 40 characters.</p>
+          </div>
+          <div class="field">
+            <label for="techStack">Tech stack <span class="optional">Optional</span></label>
+            <input id="techStack" name="techStack" maxlength="300" autocomplete="off" placeholder="e.g. JavaScript, Node.js, React, SQLite">
+          </div>
+          <details class="setup-details">
+            <summary><span class="summary-icon" aria-hidden="true">+</span> Add installation &amp; usage notes <span class="optional">Optional</span></summary>
+            <div class="setup-fields">
+              <div class="field">
+                <label for="installation">How do users install it?</label>
+                <textarea id="installation" name="installation" rows="3" maxlength="600" placeholder="Add prerequisites and the actual installation commands, if you have them."></textarea>
+              </div>
+              <div class="field">
+                <label for="usage">How do users run it?</label>
+                <textarea id="usage" name="usage" rows="3" maxlength="600" placeholder="Add the start command and a short example of using your project."></textarea>
+              </div>
+            </div>
+          </details>
+          <p class="error-message" id="error-message" role="alert" hidden></p>
+          <button class="generate-button" id="generate-button" type="submit">
+            <svg class="sparkle" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 2.3 6.7L21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3Z"/></svg>
+            <span id="generate-label">Generate README</span>
+            <span class="button-arrow" aria-hidden="true">↗</span>
+          </button>
+          <p class="form-note">Free local generation. No API key needed.</p>
+        </form>
+      </section>
+
+      <section class="output-panel" aria-labelledby="output-title" aria-busy="false" id="output-panel">
+        <div class="output-toolbar">
+          <h2 id="output-title"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 3h9l5 5v13H5V3Z"/><path d="M14 3v6h5M8 13h8M8 17h6"/></svg> README.md</h2>
+          <span class="format-badge">MARKDOWN</span>
+        </div>
+        <div class="output-body">
+          <div class="empty-state" id="empty-state">
+            <div class="paper-illustration" aria-hidden="true">
+              <div class="paper-heading"># Your next big thing</div>
+              <div class="paper-line long"></div><div class="paper-line medium"></div>
+              <div class="paper-subheading">## Getting started</div>
+              <div class="paper-code"><span>&gt;_</span><div class="paper-line"></div></div>
+              <div class="paper-line long"></div><div class="paper-line short"></div>
+              <span class="paper-star">✳</span>
+            </div>
+            <h3>Your README starts here.</h3>
+            <p>You bring the idea. We’ll help put it into words.</p>
+            <span class="empty-caption">Ready when you are.</span>
+          </div>
+          <div class="loading-state" id="loading-state" hidden>
+            <span class="loader" aria-hidden="true"></span>
+            <h3>Putting your project into words…</h3>
+            <p>Ollama is writing your README on this computer.<br>This can take a few minutes.</p>
+          </div>
+          <label class="sr-only" for="readme-output">Generated README Markdown</label>
+          <textarea id="readme-output" class="readme-output" readonly spellcheck="false" hidden></textarea>
+        </div>
+        <div class="output-footer">
+          <p id="output-status" role="status" aria-live="polite">Your generated file will appear here.</p>
+          <div class="output-actions">
+            <button class="copy-button" id="copy-button" type="button" disabled>Copy</button>
+            <button class="download-button" id="download-button" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5"/></svg> Download
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="good-to-know"><span aria-hidden="true">↳</span><p>A good description makes a better README. Missing details stay marked as unspecified. Review your draft before sharing it.</p></aside>
+  </main>
+
+  <footer class="site-footer">
+    <p>A proper introduction for your next project.</p>
+    <span>Made with words. Powered by Ollama.</span>
+  </footer>
+</body>
+</html>

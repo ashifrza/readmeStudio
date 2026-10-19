@@ -5,9 +5,9 @@ import {
   LOCAL_MODEL, LOCAL_BASE_URL, LOCAL_LIMITS,
 } from './config.js';
 
-/** Choose a provider explicitly; a stored Anthropic key never enables paid calls. */
-export function getLlmSettings() {
-  const provider = (process.env.LLM_PROVIDER?.trim() || DEFAULT_PROVIDER).toLowerCase();
+/** Choose a provider explicitly; callers can require local generation. */
+export function getLlmSettings(selectedProvider = process.env.LLM_PROVIDER) {
+  const provider = (selectedProvider?.trim() || DEFAULT_PROVIDER).toLowerCase();
   if (provider === 'anthropic') return { provider, model: MODEL, limits: LIMITS, label: 'Anthropic' };
   if (provider !== 'ollama') throw new Error('LLM_PROVIDER must be ollama or anthropic.');
   const model = process.env.OLLAMA_MODEL?.trim() || LOCAL_MODEL;
@@ -140,24 +140,51 @@ function checkOllamaResponse(response, data, model) {
   }
 }
 
+/** Ask Ollama to return every website section as a string in a JSON object. */
+function sectionSchema() {
+  return {
+    type: 'object',
+    properties: Object.fromEntries(README_SECTIONS.map((section) => [section, { type: 'string', minLength: 1 }])),
+    required: [...README_SECTIONS],
+    additionalProperties: false,
+  };
+}
+
+/** Build the Markdown headings in code and reject incomplete structured output. */
+function renderSections(text, projectName) {
+  let sections;
+  try { sections = JSON.parse(text); }
+  catch { throw new Error('The local model returned invalid section data. Try again.'); }
+  if (!sections || typeof sections !== 'object' || Array.isArray(sections)
+    || README_SECTIONS.some((section) => typeof sections[section] !== 'string' || !sections[section].trim())) {
+    throw new Error('The local model returned incomplete README sections. Try again.');
+  }
+  const title = projectName?.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/^#+\s*/, '').trim();
+  if (!title) throw new Error('A project name is required to create the README title.');
+  return `# ${title}\n\n${README_SECTIONS.map((section) => `## ${section}\n\n${sections[section].trim()}`).join('\n\n')}`;
+}
+
 /** Generate locally with a bounded context and unload the model after the request. */
-async function generateLocalReadme({ system, user, projectName }, { model, limits }) {
+async function generateLocalReadme({ system, user, projectName }, { model, limits }, structured = false) {
   const { response, data } = await requestOllama(localEndpoint(), {
     model, stream: false, think: false, keep_alive: 0,
+    ...(structured ? { format: sectionSchema() } : {}),
     messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
     options: { num_ctx: limits.contextTokens, num_predict: limits.maxOutputTokens, temperature: 0.2 },
   }, limits.requestTimeoutMs);
   checkOllamaResponse(response, data, model);
-  return validateReadme(data.message?.content, projectName);
+  const text = structured ? renderSections(data.message?.content, projectName) : data.message?.content;
+  return validateReadme(text, projectName);
 }
 
 /**
  * Generate a README with the selected provider; free local generation is default.
  * @param {{system: string, user: string, projectName?: string}} prompt Instructions and project excerpts.
+ * @param {{provider?: string, structured?: boolean}} [options] Server-selected provider and local section format.
  * @returns {Promise<string>} Complete Markdown ready for the writer.
  */
-export async function generateReadme(prompt) {
-  const settings = getLlmSettings();
+export async function generateReadme(prompt, { provider, structured = false } = {}) {
+  const settings = getLlmSettings(provider);
   if (settings.provider === 'anthropic') return generateAnthropicReadme(prompt);
-  return generateLocalReadme(prompt, settings);
+  return generateLocalReadme(prompt, settings, structured);
 }

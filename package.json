@@ -1,7 +1,7 @@
 {
   "name": "readme-gen",
   "version": "0.1.0",
-  "description": "Generate project READMEs with a free local Ollama model or optional Anthropic API.",
+  "description": "Generate READMEs from a project description in your browser, or scan project files with the CLI.",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -13,7 +13,9 @@
   },
   "scripts": {
     "start": "node bin/index.js",
-    "check": "node --check bin/index.js"
+    "web": "node web/server.js",
+    "test": "node --test web/server.test.js",
+    "check": "node --check bin/index.js && node --check src/descriptionPrompt.js && node --check src/llmClient.js && node --check web/server.js && node --check web/public/app.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.39.0",

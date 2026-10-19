@@ -2,14 +2,18 @@
 
 ## Description
 
-A small Node.js CLI that reads selected project files, asks a local model to document the project, and saves a README. The default uses Ollama on your computer, with no API key or API credits. Each module handles one part of the process so the code is easy to follow and change.
+A small Node.js project with a website and a terminal CLI. In the website, describe a project, generate a README draft, and download README.md. The CLI can scan selected project files instead. Both use local Ollama by default, with no API key or API credits. Each module handles one part of the process so the code is easy to follow and change.
 
 ```text
-scan folder -> read excerpts -> build prompt -> call local model -> save README
+Website: describe project -> build prompt -> local model -> download README
+CLI: scan folder -> read excerpts -> build prompt -> local model -> save README
 ```
 
 ## Features
 
+- The website turns a project description and optional setup notes into a downloadable README.
+- The browser shows loading and error states and lets visitors copy the generated Markdown.
+- Website generation always uses Ollama, regardless of the CLI's paid-provider setting.
 - It scans supported source and configuration files recursively.
 - It uses a free local Ollama model by default and never falls back to a paid provider.
 - It skips dependencies, build output, images, binaries, lock files, and common credential files.
@@ -39,7 +43,7 @@ This project uses Node.js 18+ with ES modules and three direct dependencies:
 - dotenv loads optional settings from a local environment file.
 - The Anthropic SDK supports the original paid provider when explicitly selected.
 
-The default local client uses Node's built-in fetch, with no extra npm dependency. Filesystem access, paths, and terminal questions also use built-in modules. The default model is [Qwen3 1.7B](https://ollama.com/library/qwen3:1.7b), served by Ollama. The optional Anthropic SDK remains pinned to version 0.39.0 for Node 18 compatibility; [that version's requirements](https://github.com/anthropics/anthropic-sdk-typescript/tree/sdk-v0.39.0#requirements) document Node 18 support.
+The website uses plain HTML, CSS, and JavaScript, served by Node's built-in HTTP module. The default local client uses Node's built-in fetch, with no extra npm dependency. Filesystem access, paths, and terminal questions also use built-in modules. The default model is [Qwen3 1.7B](https://ollama.com/library/qwen3:1.7b), served by Ollama. The optional Anthropic SDK remains pinned to version 0.39.0 for Node 18 compatibility; [that version's requirements](https://github.com/anthropics/anthropic-sdk-typescript/tree/sdk-v0.39.0#requirements) document Node 18 support.
 
 ## Installation
 
@@ -81,6 +85,22 @@ OLLAMA_BASE_URL=http://127.0.0.1:11434
 ```
 
 ## Usage
+
+### Website
+
+After installation, open Ollama and run:
+
+```powershell
+npm run web
+```
+
+Keep the terminal open and visit [README Studio on this computer](http://localhost:3000). Enter a project name and description, optionally add the tech stack and setup notes, then click Generate README. Review the Markdown and click Download to save README.md.
+
+The website uses only the submitted details, so it cannot verify source code or infer an actual folder structure. Missing facts stay unspecified. Descriptions and results are not saved on the server. It accepts one generation at a time and always uses local Ollama.
+
+See [the step-by-step website guide](web/README.md) for setup, troubleshooting, how the modules connect, and what public hosting requires. The local address works only on the computer running the server; the website has not been publicly deployed.
+
+### Terminal CLI
 
 For the first run, generate a README for this tool itself:
 
@@ -160,9 +180,18 @@ readme-gen/
 |   |-- scanner.js        Folder traversal, filtering, and priority
 |   |-- reader.js         Bounded text reads and truncation
 |   |-- promptBuilder.js  Instructions and serialized source excerpts
+|   |-- descriptionPrompt.js  Website form validation and description prompt
 |   |-- llmClient.js      Local/default and optional paid clients, response checks
 |   |-- writer.js         Overwrite confirmation and file writing
 |   `-- config.js         Ignore rules, provider limits, sections, and models
+|-- web/
+|   |-- server.js         Local HTTP server and generation endpoint
+|   |-- server.test.js    Website and fake-model integration tests
+|   |-- README.md         Beginner website setup guide
+|   `-- public/
+|       |-- index.html    Project form and Markdown output
+|       |-- styles.css    Responsive page styles
+|       `-- app.js        Submit, loading, copy, and download behavior
 |-- package.json
 |-- .env.example
 |-- .gitignore
@@ -173,10 +202,18 @@ readme-gen/
 
 Read the modules in this order: configuration, scanner, reader, prompt builder, LLM client, writer, and CLI. Follow the data between them: an array of paths becomes an array of excerpts, then a prompt, then Markdown.
 
+For the website, follow the form through browser app.js, server.js, descriptionPrompt.js, and llmClient.js. The browser downloads the returned Markdown without the CLI writer.
+
 Keep functions focused, document their purpose with JSDoc, and preserve the three-dependency scope. Check syntax before changing behavior:
 
 ```sh
 npm run check
+```
+
+Run website validation and HTTP integration tests using a fake local model:
+
+```sh
+npm test
 ```
 
 Run the local scan-and-prompt check below. It reads this project but does not call a model or write a README:
