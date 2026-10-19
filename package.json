@@ -1,0 +1,23 @@
+{
+  "name": "readme-gen",
+  "version": "0.1.0",
+  "description": "Generate project READMEs with a free local Ollama model or optional Anthropic API.",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "readme-gen": "./bin/index.js"
+  },
+  "scripts": {
+    "start": "node bin/index.js",
+    "check": "node --check bin/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.39.0",
+    "commander": "13.1.0",
+    "dotenv": "16.6.1"
+  }
+}
